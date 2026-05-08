@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aprende a Monetizar con IA</title>
+  <!-- Favicon — funciona en previsualización local -->
+  <link rel="icon" type="image/png" href="logo.png" />
+  <link rel="apple-touch-icon" href="logo.png" />
+  <!-- En Jimdo: Configuración → SEO/Favicon → subir logo.png manualmente -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0f;
+      color: #f0f0f0;
+      line-height: 1.6;
+    }
+
+    /* ── MATRIX CANVAS ── */
+    #matrix-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .85;
+    }
+
+    body > * { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      background: transparent;
+      border-bottom: 1px solid #1e1e3a22;
+    }
+
+    .hero .badge {
+      display: inline-block;
+      background: #7c3aed22;
+      border: 1px solid #7c3aed66;
+      color: #a78bfa;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 900;
+      line-height: 1.15;
+      max-width: 780px;
+      margin: 0 auto 16px;
+    }
+
+    .hero h1 span { color: #a78bfa; }
+
+    .hero p.sub {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: #9090b0;
+      max-width: 600px;
+      margin: 0 auto 36px;
+    }
+
+    /* ── VIDEO ── */
+    .video-wrapper {
+      max-width: 380px;
+      margin: 0 auto;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid #2a2a4a;
+      background: #111128;
+      position: relative;
+      aspect-ratio: 9/16;
+    }
+
+    /* ── BOTÓN UNMUTE ── */
+    .unmute-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10, 10, 30, 0.75);
+      backdrop-filter: blur(8px);
+      border: 2px solid #a78bfa88;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px 28px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 10;
+      transition: background .2s, transform .15s;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .unmute-btn:hover {
+      background: rgba(124, 58, 237, 0.6);
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .unmute-btn.hidden { display: none; }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(167,139,250,0.4); }
+      50%       { box-shadow: 0 0 0 12px rgba(167,139,250,0); }
+    }
+
+    .video-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    /* Placeholder cuando no hay video */
+    .video-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: #5a5a8a;
+      font-size: 15px;
+    }
+
+    .video-placeholder svg { opacity: .4; }
+
+    /* ── TIMER BAR ── */
+    .timer-bar-wrap {
+      max-width: 380px;
+      margin: 16px auto 0;
+      padding: 0 4px;
+    }
+
+    .timer-label {
+      font-size: 13px;
+      color: #6060a0;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .timer-label span { color: #a78bfa; font-weight: 600; }
+
+    .timer-track {
+      height: 5px;
+      background: #1e1e3a;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .timer-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7c3aed, #a78bfa);
+      border-radius: 999px;
+      width: 0%;
+      transition: width .5s linear;
+    }
+
+    /* ── CONTENIDO OCULTO ── */
+    #contenido-oculto {
+      display: none;
+      animation: fadeUp .8s ease both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── SECCIÓN: PARA QUIÉN ── */
+    .section {
+      padding: 80px 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #a78bfa;
+      margin-bottom: 12px;
+    }
+
+    .section h2 {
+      text-align: center;
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 800;
+      margin-bottom: 50px;
+    }
+
+    /* ── CARDS BENEFICIOS ── */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: rgba(10, 10, 30, 0.45);
+      backdrop-filter: blur(6px);
+      border: 1px solid #2a2a5a66;
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: border-color .2s, transform .2s;
+    }
+
+    .card:hover {
+      border-color: #7c3aed55;
+      transform: translateY(-4px);
+    }
+
+    .card .icon {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #e0e0ff;
+    }
+
+    .card p {
+      font-size: 15px;
+      color: #7070a0;
+      line-height: 1.7;
+    }
+
+    /* ── DIVISOR ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #1e1e3a;
+      margin: 0 20px;
+    }
+
+    /* ── FORM ── */
+    .form-section {
+      background: rgba(10, 8, 25, 0.5);
+      backdrop-filter: blur(8px);
+      padding: 80px 20px;
+      text-align: center;
+      border-top: 1px solid #2a2a5a44;
+    }
+
+    .form-section h2 {
+      font-size: clamp(24px, 4vw, 38px);
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .form-section h2 span { color: #a78bfa; }
+
+    .form-section p.sub {
+      color: #7070a0;
+      font-size: 16px;
+      margin-bottom: 36px;
+    }
+
+    .form-box {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .form-box input {
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid #2a2a4a66;
+      background: rgba(10, 10, 25, 0.6);
+      backdrop-filter: blur(4px);
+      color: #f0f0f0;
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-box input:focus { border-color: #7c3aed; }
+
+    .form-box input::placeholder { color: #40406a; }
+
+    .btn-primary {
+      padding: 18px 28px;
+      background: linear-gradient(135deg, #7c3aed, #9d5cf5);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: opacity .2s, transform .15s;
+    }
+
+    .btn-primary:hover { opacity: .9; transform: scale(1.02); }
+
+    .form-disclaimer {
+      font-size: 12px;
+      color: #40406a;
+      margin-top: 8px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 32px 20px;
+      font-size: 13px;
+      color: #30304a;
+      border-top: 1px solid #12122a;
+    }
+
+    /* ── COUNTDOWN ── */
+    .countdown-section {
+      background: rgba(10, 8, 25, 0.45);
+      backdrop-filter: blur(6px);
+      border-top: 1px solid #2a2a5a44;
+      border-bottom: 1px solid #2a2a5a44;
+      padding: 48px 20px;
+      text-align: center;
+    }
+
+    .countdown-section .event-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #a78bfa;
+      margin-bottom: 8px;
+    }
+
+    .countdown-section h3 {
+      font-size: clamp(18px, 3vw, 26px);
+      font-weight: 800;
+      margin-bottom: 32px;
+      color: #e0e0ff;
+    }
+
+    .countdown-section h3 span { color: #a78bfa; }
+
+    .cd-boxes {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .cd-box {
+      background: rgba(10, 10, 30, 0.4);
+      backdrop-filter: blur(6px);
+      border: 1px solid #3a3a7a55;
+      border-radius: 14px;
+      padding: 20px 24px;
+      min-width: 90px;
+      transition: border-color .3s;
+    }
+
+    .cd-box:hover { border-color: #7c3aed55; }
+
+    .cd-num {
+      font-size: clamp(34px, 6vw, 52px);
+      font-weight: 900;
+      color: #a78bfa;
+      line-height: 1;
+      display: block;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cd-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #50507a;
+      margin-top: 8px;
+      display: block;
+    }
+
+    .cd-finished {
+      font-size: 20px;
+      font-weight: 700;
+      color: #4ade80;
+      padding: 16px;
+    }
+
+    /* ── BOTONES CALENDARIO ── */
+    .cal-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .cal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: transform .15s, opacity .15s;
+    }
+
+    .cal-btn:hover { transform: translateY(-2px); opacity: .9; }
+
+    .cal-btn.google {
+      background: rgba(66, 133, 244, 0.15);
+      border-color: #4285f455;
+      color: #7ab3ff;
+    }
+
+    .cal-btn.outlook {
+      background: rgba(0, 114, 198, 0.15);
+      border-color: #0072c655;
+      color: #5ab4ff;
+    }
+
+    .cal-btn.apple {
+      background: rgba(255, 255, 255, 0.07);
+      border-color: #ffffff33;
+      color: #e0e0ff;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .hero { padding: 40px 16px 32px; }
+      .section { padding: 60px 16px; }
+      .cd-box { min-width: 72px; padding: 16px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="matrix-canvas"></canvas>
+
+  <!-- ═══════════ HERO + VIDEO ═══════════ -->
+  <section class="hero">
+    <div class="badge">🤖 Comunidad IA · Latinoamérica & España</div>
+    <h1>Aprendé a <span>monetizar con IA</span><br>sin saber programar</h1>
+    <p class="sub">Mirá el video completo y descubrí cómo acceder a nuestra comunidad, certificados y salida laboral real.</p>
+
+    <div class="video-wrapper" id="video-container">
+      <video
+        id="yt-player"
+        src="file:///root/agente-ventas/desafia/avatares/escena1.mp4"
+        playsinline
+        style="width:100%;height:100%;object-fit:cover;">
+      </video>
+      <button class="unmute-btn" id="unmute-btn" onclick="activarSonido()">
+        🔇 Tocá para activar el sonido
+      </button>
+    </div>
+
+    <!-- Barra de progreso del timer -->
+    <div class="timer-bar-wrap">
+      <div class="timer-label">
+        <span id="timer-text">Mirá el video · el contenido se desbloquea en 3:00</span>
+        <span id="timer-countdown">3:00</span>
+      </div>
+      <div class="timer-track">
+        <div class="timer-fill" id="timer-fill"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════ CONTADOR MASTERCLASS ═══════════ -->
+  <section class="countdown-section">
+    <p class="event-label">⏳ Próximo evento</p>
+    <h3>Masterclass en vivo — <span>Jueves 28 de mayo · 20:00 hs (BsAs)</span></h3>
+    <div class="cd-boxes" id="cd-boxes">
+      <div class="cd-box"><span class="cd-num" id="cd-dias">--</span><span class="cd-lbl">Días</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-horas">--</span><span class="cd-lbl">Horas</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-min">--</span><span class="cd-lbl">Minutos</span></div>
+      <div class="cd-box"><span class="cd-num" id="cd-seg">--</span><span class="cd-lbl">Segundos</span></div>
+    </div>
+
+    <div class="cal-buttons">
+      <!-- Google Calendar -->
+      <a class="cal-btn google" id="btn-google" href="#" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27 3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10 5.35 0 9.25-3.67 9.25-9.09 0-1.15-.15-1.81-.15-1.81z"/></svg>
+        Google Calendar
+      </a>
+      <!-- Outlook -->
+      <a class="cal-btn outlook" id="btn-outlook" href="#" target="_blank" rel="noopener">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M7 12a5 5 0 1 0 10 0A5 5 0 0 0 7 12zm10-7h-2V3h-2v2H9V3H7v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z"/></svg>
+        Outlook
+      </a>
+      <!-- Apple / ICS -->
+      <a class="cal-btn apple" id="btn-ics" href="#" download="masterclass-ia.ics">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17 2h-2V1h-2v1H9V1H7v1H5a2 2 0 0 0-2 2v17a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zm0 19H5V9h14v12zM7 11h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/></svg>
+        Apple / ICS
+      </a>
+    </div>
+  </section>
+
+  <!-- ═══════════ CONTENIDO OCULTO ═══════════ -->
+  <div id="contenido-oculto">
+
+    <!-- ── Beneficios ── -->
+    <section class="section">
+      <p class="section-label">¿Por qué unirte?</p>
+      <h2>Todo lo que obtenés al ingresar</h2>
+
+      <div class="cards">
+
+        <div class="card">
+          <div class="icon">💸</div>
+          <h3>Monetizá rápido con IA</h3>
+          <p>Aprendés a usar Claude Code y otras herramientas de IA para generar ingresos reales desde las primeras semanas, sin experiencia previa en programación.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">💼</div>
+          <h3>Salida laboral real</h3>
+          <p>Los alumnos más comprometidos acceden a oportunidades de empleo concretas. Conectamos talento con empresas que buscan profesionales en IA.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🎓</div>
+          <h3>Certificado de curso</h3>
+          <p>Al finalizar, obtenés un certificado que podés sumar a tu currículum y LinkedIn, diferenciándote en un mercado laboral cada vez más competitivo.</p>
+        </div>
+
+        <div class="card">
+          <div class="icon">🌎</div>
+          <h3>Comunidad activa</h3>
+          <p>Acceso a una comunidad de personas en Latinoamérica y España que aprenden, comparten proyectos y se ayudan mutuamente a crecer con IA.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ── Formulario ── -->
+    <section class="form-section">
+      <h2>Quiero mi lugar <span>en la comunidad</span></h2>
+      <p class="sub">Dejá tu nombre y correo para recibir acceso al grupo de WhatsApp y los próximos pasos.</p>
+
+      <form class="form-box" id="lead-form">
+        <input type="text"  name="nombre" placeholder="Tu nombre" required autocomplete="given-name" />
+        <input type="email" name="email"  placeholder="Tu correo electrónico" required autocomplete="email" />
+        <button type="submit" class="btn-primary">Quiero aprender a monetizar con IA →</button>
+        <p class="form-disclaimer">Sin spam. Tu información está segura y no se comparte con terceros.</p>
+      </form>
+    </section>
+
+  </div><!-- /contenido-oculto -->
+
+  <footer class="footer">
+    © 2026 · Comunidad IA · Todos los derechos reservados
+  </footer>
+
+  <script>
+    // ═══════════════════════════════════════════
+    // MATRIX AZUL
+    // ═══════════════════════════════════════════
+    (function () {
+      const canvas = document.getElementById('matrix-canvas');
+      const ctx    = canvas.getContext('2d');
+      const CHARS  = 'アイウエオカキクケコサシスセソタチツテトナニヌネノ01アβΩΔΨΦΛ∑∞≠≈∂∇ξψωφ◆◇▲△▼▽⬡⬢⬟⬠ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΠΡΣΤΥΦΧΨΩabcdefghijklmnopqrstuvwxyz0123456789'.split('');
+      const FONT_SIZE = 14;
+      let cols, drops;
+
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+        cols  = Math.floor(canvas.width / FONT_SIZE);
+        drops = Array.from({ length: cols }, () => Math.random() * -canvas.height / FONT_SIZE | 0);
+      }
+
+      function draw() {
+        // fade trail — menos opaco = rastro más largo y vistoso
+        ctx.fillStyle = 'rgba(10, 10, 15, 0.07)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.font = FONT_SIZE + 'px monospace';
+
+        for (let i = 0; i < drops.length; i++) {
+          const char = CHARS[Math.random() * CHARS.length | 0];
+          const y    = drops[i] * FONT_SIZE;
+
+          // cabeza: blanco con glow fuerte
+          if (drops[i] > 0) {
+            ctx.shadowColor = '#00ccff';
+            ctx.shadowBlur  = 24;
+            ctx.fillStyle   = '#ffffff';
+            ctx.fillText(char, i * FONT_SIZE, y);
+            // segunda pasada para intensificar
+            ctx.fillText(char, i * FONT_SIZE, y);
+            ctx.shadowBlur  = 0;
+          }
+
+          // cuerpo: cyan/azul eléctrico máximo brillo
+          const hue = 195 + Math.random() * 35;   // 195–230 cyan-azul
+          const lgt = 75  + Math.random() * 20;   // 75–95% altísimo brillo
+          ctx.shadowColor = `hsl(${hue}, 100%, 80%)`;
+          ctx.shadowBlur  = 14;
+          ctx.fillStyle   = `hsl(${hue}, 100%, ${lgt}%)`;
+          const bodyChar = CHARS[Math.random() * CHARS.length | 0];
+          ctx.fillText(bodyChar, i * FONT_SIZE, y - FONT_SIZE);
+          // segunda pasada para saturar más
+          ctx.fillText(bodyChar, i * FONT_SIZE, y - FONT_SIZE);
+          ctx.shadowBlur  = 0;
+
+          // reiniciar columna al salir de pantalla
+          if (y > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
+          }
+          drops[i]++;
+        }
+      }
+
+      resize();
+      window.addEventListener('resize', resize);
+      setInterval(draw, 40); // ~25 fps
+    })();
+
+    // ═══════════════════════════════════════════
+    // AUTOPLAY CON AUDIO — fallback a muted si el navegador lo bloquea
+    // ═══════════════════════════════════════════
+    (function () {
+      const video = document.getElementById('yt-player');
+      const btn   = document.getElementById('unmute-btn');
+
+      video.volume = 1;
+
+      // Intentar con audio primero
+      video.play()
+        .then(() => {
+          // Autoplay con audio OK — ocultamos el botón
+          btn.classList.add('hidden');
+        })
+        .catch(() => {
+          // Navegador bloqueó el audio → silenciar y reintentar
+          video.muted = true;
+          video.play().catch(() => {});
+          // Mostrar botón de unmute
+          btn.classList.remove('hidden');
+        });
+    })();
+
+    function activarSonido() {
+      const video = document.getElementById('yt-player');
+      const btn   = document.getElementById('unmute-btn');
+      video.muted  = false;
+      video.volume = 1;
+      btn.classList.add('hidden');
+    }
+
+    // ═══════════════════════════════════════════
+    // TIMER — 3 minutos = 180 segundos
+    // ═══════════════════════════════════════════
+    const TOTAL = 28; // segundos hasta desbloquear (PRUEBA)
+    let elapsed = 0;
+
+    const fill      = document.getElementById('timer-fill');
+    const countdown = document.getElementById('timer-countdown');
+    const timerText = document.getElementById('timer-text');
+    const hidden    = document.getElementById('contenido-oculto');
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function unlock() {
+      hidden.style.display = 'block';
+      fill.style.width = '100%';
+      countdown.textContent = '¡Desbloqueado!';
+      timerText.textContent  = '✅ Contenido desbloqueado — seguí leyendo';
+      countdown.style.color  = '#4ade80';
+      timerText.style.color  = '#4ade80';
+    }
+
+    const interval = setInterval(() => {
+      elapsed++;
+      const pct = (elapsed / TOTAL) * 100;
+      fill.style.width = pct + '%';
+      const remaining = TOTAL - elapsed;
+      countdown.textContent = formatTime(remaining);
+
+      if (elapsed >= TOTAL) {
+        clearInterval(interval);
+        unlock();
+        hidden.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 1000);
+
+    // ═══════════════════════════════════════════
+    // CONTADOR MASTERCLASS — 28/05/2026 20:00 BsAs (UTC-3)
+    // ═══════════════════════════════════════════
+    const TARGET = new Date('2026-05-28T20:00:00-03:00');
+
+    function tickCountdown() {
+      const now  = new Date();
+      const diff = TARGET - now;
+
+      if (diff <= 0) {
+        document.getElementById('cd-boxes').innerHTML =
+          '<p class="cd-finished">🔴 ¡La Masterclass está comenzando ahora!</p>';
+        return;
+      }
+
+      const dias  = Math.floor(diff / 86400000);
+      const horas = Math.floor((diff % 86400000) / 3600000);
+      const min   = Math.floor((diff % 3600000)  / 60000);
+      const seg   = Math.floor((diff % 60000)    / 1000);
+
+      document.getElementById('cd-dias').textContent  = String(dias).padStart(2,'0');
+      document.getElementById('cd-horas').textContent = String(horas).padStart(2,'0');
+      document.getElementById('cd-min').textContent   = String(min).padStart(2,'0');
+      document.getElementById('cd-seg').textContent   = String(seg).padStart(2,'0');
+    }
+
+    tickCountdown();
+    setInterval(tickCountdown, 1000);
+
+    // ── Links de calendario ──
+    // Masterclass: 28/05/2026 20:00 BsAs (UTC-3) → 23:00 UTC | duración 2 hs
+    const EVT = {
+      title:    'Masterclass IA — Aprende a Monetizar con Claude Code',
+      start:    '20260528T230000Z',   // 20:00 BsAs = 23:00 UTC
+      end:      '20260529T010000Z',   // 22:00 BsAs = 01:00 UTC
+      details:  'Masterclass en vivo sobre cómo monetizar con Inteligencia Artificial sin saber programar. Comunidad IA — Latinoamérica y España.',
+      location: 'Online (link por WhatsApp)'
+    };
+
+    // Google Calendar
+    document.getElementById('btn-google').href =
+      `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+      `&text=${encodeURIComponent(EVT.title)}` +
+      `&dates=${EVT.start}/${EVT.end}` +
+      `&details=${encodeURIComponent(EVT.details)}` +
+      `&location=${encodeURIComponent(EVT.location)}`;
+
+    // Outlook Live
+    document.getElementById('btn-outlook').href =
+      `https://outlook.live.com/calendar/0/deeplink/compose?` +
+      `subject=${encodeURIComponent(EVT.title)}` +
+      `&startdt=2026-05-28T23:00:00Z` +
+      `&enddt=2026-05-29T01:00:00Z` +
+      `&body=${encodeURIComponent(EVT.details)}` +
+      `&location=${encodeURIComponent(EVT.location)}`;
+
+    // Apple / ICS — genera y descarga el archivo .ics
+    const icsContent =
+      `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//ComunidadIA//ES\r\n` +
+      `BEGIN:VEVENT\r\n` +
+      `UID:masterclass-ia-2026@comunidad\r\n` +
+      `DTSTAMP:${EVT.start}\r\n` +
+      `DTSTART:${EVT.start}\r\n` +
+      `DTEND:${EVT.end}\r\n` +
+      `SUMMARY:${EVT.title}\r\n` +
+      `DESCRIPTION:${EVT.details}\r\n` +
+      `LOCATION:${EVT.location}\r\n` +
+      `END:VEVENT\r\nEND:VCALENDAR`;
+
+    const icsBlob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    document.getElementById('btn-ics').href = URL.createObjectURL(icsBlob);
+
+    // ═══════════════════════════════════════════
+    // FORMULARIO → WhatsApp
+    // ═══════════════════════════════════════════
+    document.getElementById('lead-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const nombre = this.nombre.value.trim();
+      const email  = this.email.value.trim();
+
+      // Mensaje pre-cargado en WhatsApp
+      const msg = encodeURIComponent(
+        `Hola! Me quiero unir a la comunidad IA.\nNombre: ${nombre}\nEmail: ${email}`
+      );
+
+      const waUrl = `https://wa.me/542974264080?text=${msg}`;
+      window.open(waUrl, '_blank');
+    });
+  </script>
+
+</body>
+</html>
